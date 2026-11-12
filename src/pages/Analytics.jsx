@@ -1,0 +1,10 @@
+import {useState} from 'react';import {useApp} from '../store';import {Title,CitySelect,Source} from '../components/ui';
+import {ResponsiveContainer,LineChart,Line,XAxis,YAxis,Tooltip,CartesianGrid,Legend} from 'recharts';
+const R=[['24 hours',24],['7 days',168],['30 days',720]];const M=[['aqi','AQI','#102A43'],['pm25','PM2.5','#0D9488'],['pm10','PM10','#10B981']];
+export default function Analytics(){const{cities,sel,setSel}=useApp();const c=cities.find(x=>x.name===sel)||cities[0];const[h,setH]=useState(168);const[m,setM]=useState(['aqi','pm25']);
+ const step=Math.max(1,Math.floor(h/120));const data=c.series.slice(-h).filter((_,i)=>i%step===0).map(x=>({t:h<=24?x.t.slice(11,16):x.t.slice(5,10)+' '+x.t.slice(11,13)+'h',aqi:x.aqi,pm25:x.pm25,pm10:x.pm10}));
+ const tog=k=>setM(p=>p.includes(k)?(p.length>1?p.filter(x=>x!==k):p):[...p,k]);
+ return <div className="space-y-6"><Title t="Historical Analytics" s={`${c.name}, ${c.state}`}><div className="w-full sm:w-64"><CitySelect value={c.name} onChange={setSel}/></div></Title>
+ <div className="card space-y-4"><div className="flex flex-wrap gap-2">{R.map(([l,v])=><button key={v} onClick={()=>setH(v)} className={`btn-o ${h===v?'on':''}`}>{l}</button>)}<span className="mx-2"/>{M.map(([k,l])=><button key={k} onClick={()=>tog(k)} className={`btn-o ${m.includes(k)?'on':''}`}>{l}</button>)}</div>
+ {data.length===0?<p className="py-10 text-center text-slate-500">No history available.</p>:<div className="h-80"><ResponsiveContainer><LineChart data={data}><CartesianGrid strokeDasharray="3 3" opacity={.2}/><XAxis dataKey="t" fontSize={11} minTickGap={30}/><YAxis fontSize={11}/><Tooltip/><Legend/>{M.filter(([k])=>m.includes(k)).map(([k,l,col])=><Line key={k} dataKey={k} name={l} stroke={col} dot={false} strokeWidth={2} connectNulls/>)}</LineChart></ResponsiveContainer></div>}
+ <p className="text-xs text-slate-500">Hourly model values (PM in µg/m³). AQI here is an hourly estimate, whereas official CPCB AQI uses 24-hour averages.</p></div><Source/></div>}

@@ -1,0 +1,9 @@
+import {useState} from 'react';import {MapContainer,TileLayer,Marker,Popup,useMap} from 'react-leaflet';import L from 'leaflet';import {useNavigate} from 'react-router-dom';
+import {useApp} from '../store';import {catOf,CATS,fmt} from '../aqi';import {CitySelect,Title,Source} from '../components/ui';
+const icon=c=>L.divIcon({className:'',iconSize:[38,38],html:`<div class="pin" style="width:38px;height:38px;background:${catOf(c.aqi).color}">${c.aqi??'–'}</div>`});
+function Fly({c}){const m=useMap();if(c)m.flyTo([c.lat,c.lon],7);return null}
+export default function MapPage(){const{cities,setSel}=useApp();const nav=useNavigate();const[t,setT]=useState(null);
+ return <div><Title t="India Air Quality Map" s="Click a marker for details"><div className="w-full sm:w-64"><CitySelect onChange={n=>setT(cities.find(c=>c.name===n))}/></div></Title>
+ <div className="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700"><MapContainer center={[22.5,79]} zoom={5} minZoom={4} style={{height:'68vh',width:'100%'}}><TileLayer attribution="© OpenStreetMap contributors" url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"/><Fly c={t}/>
+ {cities.map(c=><Marker key={c.name} position={[c.lat,c.lon]} icon={icon(c)}><Popup><div className="text-sm"><b>{c.name}, {c.state}</b><div>AQI {c.aqi??'—'} · {catOf(c.aqi).name}</div><div>PM2.5 {fmt(c.p.pm25)} · PM10 {fmt(c.p.pm10)} µg/m³</div><button className="mt-2 font-semibold text-teal" onClick={()=>{setSel(c.name);nav('/dashboard')}}>Open dashboard →</button></div></Popup></Marker>)}</MapContainer>
+ <div className="absolute bottom-3 left-3 z-[500] rounded-xl bg-white/95 p-2 text-xs shadow dark:bg-slate-800/95">{CATS.map(c=><div key={c.name} className="flex items-center gap-2"><i className="h-3 w-3 rounded-full" style={{background:c.color}}/>{c.name}</div>)}</div></div><div className="mt-3"><Source/></div></div>}

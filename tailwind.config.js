@@ -1,0 +1,1 @@
+export default {darkMode:'class',content:['./index.html','./src/**/*.{js,jsx}'],theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','Inter','sans-serif']},colors:{navy:'#102A43',teal:'#0D9488',emerald:'#10B981'}}}}
